@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: myregistry.azurecr.io/myapp
+  repository: myregistry123ali.azurecr.io/myapp
   tag: "latest"
   pullPolicy: IfNotPresent
 

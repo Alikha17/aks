@@ -39,38 +39,17 @@ pipeline {
 
         stage('Update Helm Values & Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-pat', 
-                                 passwordVariable: 'GIT_TOKEN', 
+                withCredentials([usernamePassword(credentialsId: 'github-pat',
+                                 passwordVariable: 'GIT_TOKEN',
                                  usernameVariable: 'GIT_USER')]) {
                     sh '''
                         # 1. Configure Git
                         git config user.email "krishnaalikha236@gmail.com"
                         git config user.name "Alikha17"
 
-                        # 2. Update Helm values (using shell variables)
+                        # 2. Ensure we are on main branch
+                        git checkout main
+
+                        # 3. Update Helm values
                         sed -i "s|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|" charts/values.yaml
-                        sed -i "s|tag:.*|tag: \\"${BUILD_NUMBER}\\"|" charts/values.yaml
-
-                        # 3. Stage and Commit
-                        git add charts/values.yaml
-                        git commit -m "Update image tag to ${BUILD_NUMBER}"
-
-                        # 4. Pull latest changes to avoid non-fast-forward errors
-                        # The rebase ensures your commit stays at the tip
-                        git pull --rebase https://${GIT_USER}:${GIT_TOKEN}@github.com/Alikha17/aks.git main
-
-                        # 5. Final Push
-                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Alikha17/aks.git main
-                    '''
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            // Clean up workspace to save space on the Jenkins agent
-            cleanWs()
-        }
-    }
-}
+                        sed -i "s|tag:.*

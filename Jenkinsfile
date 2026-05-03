@@ -25,7 +25,7 @@ pipeline {
         stage('Push to ACR') {
             steps {
                 script {
-                    docker.withRegistry('https://myregistry.azurecr.io','acr-service-principal') {
+                    docker.withRegistry('https://myregistry123ali.azurecr.io','acr-service-principal') {
                     docker.image('myregistry.azurecr.io/myapp:${BUILD_NUMBER}').push()
                         
                     }

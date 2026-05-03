@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "myregistry.azurecr.io"
+        REGISTRY = "myregistry123ali.azurecr.io"
         IMAGE_NAME = "myapp"
         ACR_CREDENTIALS = credentials('acr-service-principal') // store in Jenkins credentials
     }
@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://myregistry123ali.azurecr.io','acr-service-principal') {
-                    docker.image('myregistry.azurecr.io/myapp:${BUILD_NUMBER}').push()
+                    docker.image("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}").push()
                         
                     }
                 }

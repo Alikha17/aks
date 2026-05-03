@@ -1,0 +1,11 @@
+replicaCount: 2
+
+image:
+  repository: myregistry.azurecr.io/myapp
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+

@@ -52,4 +52,28 @@ pipeline {
 
                         # 3. Update Helm values
                         sed -i "s|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|" charts/values.yaml
-                        sed -i "s|tag:.*
+                        sed -i "s|tag:.*|tag: \\"${BUILD_NUMBER}\\"|" charts/values.yaml
+
+                        # 4. Stage and Commit
+                        git add charts/values.yaml
+                        git commit -m "Update image tag to ${BUILD_NUMBER}" || echo "No changes to commit"
+
+                        # 5. Pull latest changes to avoid non-fast-forward errors
+                        git pull --rebase origin main
+
+                        # 6. Final Push
+                        git push origin main
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up workspace to save space on the Jenkins agent
+            cleanWs()
+        }
+    }
+}
+

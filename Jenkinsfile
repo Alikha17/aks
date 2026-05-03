@@ -4,7 +4,7 @@ pipeline {
     environment {
         REGISTRY = "myregistry123ali.azurecr.io"
         IMAGE_NAME = "myapp"
-        ACR_CREDENTIALS = credentials('acr-service-principal')
+        // ACR_CREDENTIALS is used by the docker steps below
     }
 
     stages {
@@ -40,17 +40,26 @@ pipeline {
 
         stage('Update Helm Values') {
             steps {
-                sh """
-                sed -i 's|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|' charts/values.yaml
-                sed -i 's|tag:.*|tag: "${BUILD_NUMBER}"|' charts/values.yaml
+                // Binding the 'github-pat' credential to variables
+                withCredentials([usernamePassword(credentialsId: 'github-pat', 
+                                 passwordVariable: 'GIT_TOKEN', 
+                                 usernameVariable: 'GIT_USER')]) {
+                    sh """
+                        # Update the Helm values file
+                        sed -i 's|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|' charts/values.yaml
+                        sed -i 's|tag:.*|tag: "${BUILD_NUMBER}"|' charts/values.yaml
 
-                git config user.email "krishnaalikha236@gmail.com"
-                git config user.name "Alikha17"
+                        # Git configuration
+                        git config user.email "krishnaalikha236@gmail.com"
+                        git config user.name "Alikha17"
 
-                git add charts/values.yaml
-                git commit -m "Update image tag to ${BUILD_NUMBER}"
-                git push origin main
-                """
+                        git add charts/values.yaml
+                        git commit -m "Update image tag to ${BUILD_NUMBER}"
+
+                        # Use the credential variables in the push URL to avoid authentication prompts
+                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Alikha17/aks.git main
+                    """
+                }
             }
         }
     }

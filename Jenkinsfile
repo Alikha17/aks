@@ -36,7 +36,7 @@ pipeline {
             steps {
                 sh """
                 sed -i 's|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|' charts/values.yaml
-                sed -i 's|tag:.*|tag: "${BUILD_NUMBER}"|' charts/myapp/values.yaml
+                sed -i 's|tag:.*|tag: "${BUILD_NUMBER}"|' charts/values.yaml
                 git config --global user.email "krishnaalikha236@gmail.com"
                 git config --global user.name "Alikha17"
                 git commit -am "Update image tag to ${BUILD_NUMBER}"

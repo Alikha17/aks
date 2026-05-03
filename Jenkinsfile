@@ -4,7 +4,7 @@ pipeline {
     environment {
         REGISTRY = "myregistry123ali.azurecr.io"
         IMAGE_NAME = "myapp"
-        ACR_CREDENTIALS = credentials('acr-service-principal') // store in Jenkins credentials
+        ACR_CREDENTIALS = credentials('acr-service-principal')
     }
 
     stages {
@@ -25,9 +25,8 @@ pipeline {
         stage('Push to ACR') {
             steps {
                 script {
-                    docker.withRegistry('https://myregistry123ali.azurecr.io','acr-service-principal') {
-                    docker.image("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}").push()
-                        
+                    docker.withRegistry("https://${REGISTRY}", 'acr-service-principal') {
+                        docker.image("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}").push()
                     }
                 }
             }
@@ -36,9 +35,10 @@ pipeline {
         stage('Update Helm Values') {
             steps {
                 sh """
-                sed -i 's/tag:.*/tag: "${BUILD_NUMBER}"/' charts/myapp/values.yaml
-                git config --global user.email "jenkins@ci.com"
-                git config --global user.name "jenkins"
+                sed -i 's|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|' charts/myapp/values.yaml
+                sed -i 's|tag:.*|tag: "${BUILD_NUMBER}"|' charts/myapp/values.yaml
+                git config --global user.email "krishnaalikha236@gmail.com"
+                git config --global user.name "Alikha17"
                 git commit -am "Update image tag to ${BUILD_NUMBER}"
                 git push origin main
                 """

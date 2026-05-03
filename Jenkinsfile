@@ -10,7 +10,13 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Alikha17/aks.git'
+                checkout([$class: 'GitSCM',
+                    branches: [[name: 'main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Alikha17/aks.git',
+                        credentialsId: 'github-pat'
+                    ]]
+                ])
             }
         }
 
@@ -37,13 +43,15 @@ pipeline {
                 sh """
                 sed -i 's|repository:.*|repository: ${REGISTRY}/${IMAGE_NAME}|' charts/values.yaml
                 sed -i 's|tag:.*|tag: "${BUILD_NUMBER}"|' charts/values.yaml
-                git config --global user.email "krishnaalikha236@gmail.com"
-                git config --global user.name "Alikha17"
-                git commit -am "Update image tag to ${BUILD_NUMBER}"
+
+                git config user.email "krishnaalikha236@gmail.com"
+                git config user.name "Alikha17"
+
+                git add charts/values.yaml
+                git commit -m "Update image tag to ${BUILD_NUMBER}"
                 git push origin main
                 """
             }
         }
     }
 }
-
